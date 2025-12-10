@@ -1,0 +1,14 @@
+vendor/
+node_modules/
+
+docker/mysql/data/
+mysql/
+mysql_data/
+*.sock
+
+storage/*.cache
+*.log
+
+.DS_Store
+.idea/
+.vscode/

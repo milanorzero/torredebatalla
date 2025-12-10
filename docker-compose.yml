@@ -1,0 +1,64 @@
+services:
+
+  app:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    image: torredebatalla_app:latest
+    container_name: torredebatalla_app
+    restart: unless-stopped
+    volumes:
+      - ./:/var/www/html:cached
+    networks:
+      - laravel
+    depends_on:
+      - mysql
+
+  mysql:
+    image: mysql:8.0
+    container_name: torredebatalla_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: torredebatalla_db
+      MYSQL_USER: laravel
+      MYSQL_PASSWORD: laravel
+    volumes:
+      - mysql_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    networks:
+      - laravel
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: torredebatalla_phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_HOST: torredebatalla_mysql
+      PMA_USER: root
+      PMA_PASSWORD: root
+    ports:
+      - "8081:80"
+    networks:
+      - laravel
+
+  nginx:
+    image: nginx:alpine
+    container_name: torredebatalla_nginx
+    restart: unless-stopped
+    ports:
+      - "8000:80"
+    volumes:
+      - ./:/var/www/html:ro
+      - ./docker/nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    networks:
+      - laravel
+    depends_on:
+      - app
+
+networks:
+  laravel:
+
+volumes:
+  mysql_data:
