@@ -72,7 +72,7 @@ class AdminController extends Controller
 
     public function viewProduct()
     {
-        $products=Product::paginate(1);
+        $products=Product::paginate(3);
         return view('admin.viewproduct',compact('products'));
     }
     public function deleteProduct($id)
@@ -99,22 +99,24 @@ class AdminController extends Controller
         $product->product_quantity=$request->product_quantity;
         $product->product_price=$request->product_price;
 
-        $image=$request->product_image;
-        if($image){ 
-            $imagename = time().'.'.$image->getClientOriginalExtension();
-            $image_path = public_path('products/' . $product->product_image);
-            if  (file_exists($image_path)) {
-                unlink($image_path);
-            }
-            $product->product_image=$imagename;
-        }
+        $image = $request->file('product_image');
 
-        $product->product_category=$request->product_category;
-        $product->save();
-
-        if($image && $product->save()){
-            $request->product_image->move('products',$imagename);
+if ($image) {
+    if ($product->product_image) {
+        $oldPath = public_path('products/' . $product->product_image);
+        if (file_exists($oldPath) && is_file($oldPath)) {
+            unlink($oldPath);
         }
-        return redirect()->back()->with('product_updated_message','Producto actualizado exitosamente');
+    }
+
+    $imagename = time() . '.' . $image->getClientOriginalExtension();
+    $image->move(public_path('products'), $imagename);
+    $product->product_image = $imagename;
+}
+
+$product->product_category = $request->product_category;
+$product->save();
+
+return redirect()->back()->with('product_updated_message', 'Producto actualizado exitosamente');
     }
 }

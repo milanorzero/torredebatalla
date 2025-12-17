@@ -26,19 +26,13 @@
       <nav class="navbar navbar-expand-lg">
         <div class="container-fluid d-flex align-items-center justify-content-between">
           <div class="navbar-header">
-            <a href="#" class="navbar-brand">
-              <div class="brand-text brand-big text-uppercase"><strong class="text-primary">Dark</strong><strong>Admin</strong></div>
-              <div class="brand-text brand-sm"><strong class="text-primary">D</strong><strong>A</strong></div>
-            </a>
-            <button class="sidebar-toggle"><i class="fa fa-long-arrow-left"></i></button>
           </div>
-
           <div class="list-inline-item logout">
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
                 <x-dropdown-link :href="route('logout')"
                     onclick="event.preventDefault(); this.closest('form').submit();">
-                    {{ __('Log Out') }}
+                    {{ __('Desconectarse') }}
                 </x-dropdown-link>
             </form>
           </div>
@@ -61,7 +55,7 @@
         </div>
 
         <!-- Menú -->
-        <span class="heading">Main</span>
+        <span class="heading">Menu</span>
         <ul class="list-unstyled">
           <li><a href="{{ route('dashboard') }}"><i class="icon-home"></i>Home</a></li>
 
@@ -85,6 +79,15 @@
               <li><a href="#">Ver orden</a></li>
             </ul>
           </li>
+           <li>
+            <a href="#dropdownCategories" data-toggle="collapse">
+              <i class="icon-windows"></i>Jugadores
+            </a>
+            <ul id="dropdownCategories" class="collapse list-unstyled">
+              <li><a href="{{ route('admin.addcategory') }}">Agregar jugador</a></li>
+              <li><a href="{{ route('admin.viewcategory') }}">Ver jugadores</a></li>
+            </ul>
+          </li>
         </ul>
       </nav>
 
@@ -92,7 +95,7 @@
       <div class="page-content">
         <div class="page-header">
           <div class="container-fluid">
-            <h2 class="h5 no-margin-bottom">Dashboard</h2>
+            <h2 class="h5 no-margin-bottom">Panel de administrador</h2>
           </div>
         </div>
 

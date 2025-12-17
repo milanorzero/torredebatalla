@@ -1,16 +1,46 @@
 FROM php:8.2-fpm
 
-RUN apt-get update && apt-get install -y \
-    git curl zip unzip libpng-dev libxml2-dev libonig-dev libzip-dev \
-    && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip
+# Instalar dependencias del sistema y extensiones PHP
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git \
+    curl \
+    unzip \
+    libpng-dev \
+    libxml2-dev \
+    libonig-dev \
+    libzip-dev \
+    && docker-php-ext-install \
+        pdo_mysql \
+        mbstring \
+        exif \
+        pcntl \
+        bcmath \
+        gd \
+        zip \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
-COPY --from=composer:2.6 /usr/bin/composer /usr/bin/composer
+# Composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
+# Directorio de trabajo
 WORKDIR /var/www/html
 
+# Copiar solo composer primero (mejor cache)
 COPY composer.json composer.lock ./
-RUN composer install --no-interaction --prefer-dist --optimize-autoloader || true
 
+# Instalar dependencias PHP
+RUN composer install \
+    --no-interaction \
+    --prefer-dist \
+    --optimize-autoloader
+
+# Copiar el resto del proyecto
 COPY . .
 
+# Permisos para Laravel
+RUN chown -R www-data:www-data /var/www/html \
+    && chmod -R 775 storage bootstrap/cache
+
+EXPOSE 9000
 CMD ["php-fpm"]
