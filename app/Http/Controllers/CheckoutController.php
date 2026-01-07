@@ -54,7 +54,7 @@ class CheckoutController extends Controller
             'extra'          => ['nullable', 'string', 'max:255'],
             'postal_code'    => ['nullable', 'string', 'max:50'],
             'pickup_location'=> ['required_if:delivery_type,pickup', 'nullable', 'string', 'max:255'],
-            'payment_method' => ['required', 'in:transfer,mercadopago'],
+            'payment_method' => ['required', 'in:transfer,webpay,mercadopago'],
             'points_used'    => ['nullable', 'integer', 'min:0'],
         ]);
 
@@ -96,9 +96,17 @@ class CheckoutController extends Controller
             ? (string) $request->rut
             : (string) $request->passport;
 
-        $paymentMethod = $request->payment_method === 'transfer'
-            ? 'transferencia'
-            : 'mercadopago';
+        $requestedPayment = (string) $request->payment_method;
+
+        if ($requestedPayment === 'mercadopago' && blank(config('mercadopago.access_token'))) {
+            $requestedPayment = 'webpay';
+        }
+
+        $paymentMethod = match ($requestedPayment) {
+            'transfer' => 'transferencia',
+            'webpay' => 'webpay',
+            default => 'mercadopago',
+        };
 
         $buyOrder = 'TB-' . now()->timestamp . '-' . Str::upper(Str::random(6));
 
@@ -170,8 +178,12 @@ class CheckoutController extends Controller
             report($e);
         }
 
-        if ($request->payment_method === 'transfer') {
+        if ($requestedPayment === 'transfer') {
             return redirect()->route('payment.transfer', $order);
+        }
+
+        if ($requestedPayment === 'webpay') {
+            return redirect()->route('webpay.start', $order);
         }
 
         return redirect()->route('mercadopago.init');

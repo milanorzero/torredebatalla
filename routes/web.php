@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\PointController;
 use App\Http\Controllers\Admin\StorageController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\MercadoPagoController;
+use App\Http\Controllers\WebpayController;
 use App\Http\Controllers\ContactController;
 use App\Models\Order;
 
@@ -68,6 +69,9 @@ Route::get('/checkout/success/{order}', function (Order $order) {
         ->route('index')
         ->with('success', "Orden #{$order->id} creada correctamente.");
 })->name('checkout.success');
+
+Route::get('/pagar/webpay/{order}', [WebpayController::class, 'start'])->name('webpay.start');
+Route::match(['get', 'post'], '/webpay/return', [WebpayController::class, 'return'])->name('webpay.return');
 
 Route::get('/pagar/mercadopago', [MercadoPagoController::class, 'init'])->name('mercadopago.init');
 

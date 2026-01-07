@@ -6,6 +6,17 @@
 <div class="container">
     <h2 class="mb-4">Checkout</h2>
 
+    @if($errors->any())
+        <div class="alert alert-danger">
+            <strong>Revisa los datos del formulario:</strong>
+            <ul class="mb-0">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
     {{-- RESUMEN DEL CARRITO --}}
     <div class="card mb-4">
         <div class="card-header"><strong>Resumen del carrito</strong></div>
@@ -30,21 +41,21 @@
         <div class="card mb-4">
             <div class="card-header"><strong>1. Datos personales</strong></div>
             <div class="card-body">
-                <input type="email" name="email" class="form-control mb-2" placeholder="Correo electrónico" required>
-                <input type="text" name="first_name" class="form-control mb-2" placeholder="Nombres" required>
-                <input type="text" name="last_name" class="form-control mb-2" placeholder="Apellidos" required>
-                <input type="text" name="phone" class="form-control mb-2" placeholder="Teléfono" required>
+                <input type="email" name="email" class="form-control mb-2" placeholder="Correo electrónico" value="{{ old('email') }}" required>
+                <input type="text" name="first_name" class="form-control mb-2" placeholder="Nombres" value="{{ old('first_name') }}" required>
+                <input type="text" name="last_name" class="form-control mb-2" placeholder="Apellidos" value="{{ old('last_name') }}" required>
+                <input type="text" name="phone" class="form-control mb-2" placeholder="Teléfono" value="{{ old('phone') }}" required>
 
                 <select name="document_type" id="documentType" class="form-control mb-2" required>
                     <option value="">Tipo de identificación</option>
-                    <option value="rut">RUT</option>
-                    <option value="passport">Pasaporte</option>
+                      <option value="rut" @selected(old('document_type')==='rut')>RUT</option>
+                      <option value="passport" @selected(old('document_type')==='passport')>Pasaporte</option>
                 </select>
 
                 <input type="text" name="rut" id="rutField" placeholder="RUT"
-                       class="form-control mb-2" style="display:none;">
+                      class="form-control mb-2" value="{{ old('rut') }}" style="{{ old('document_type')==='rut' ? '' : 'display:none;' }}">
                 <input type="text" name="passport" id="passportField" placeholder="Pasaporte"
-                       class="form-control mb-2" style="display:none;">
+                      class="form-control mb-2" value="{{ old('passport') }}" style="{{ old('document_type')==='passport' ? '' : 'display:none;' }}">
 
                 <button type="button" class="btn btn-primary mt-2" onclick="goStep2()">
                     Guardar y continuar
@@ -55,34 +66,34 @@
         {{-- =============================
              PASO 2: ENVÍO / RETIRO
         ============================= --}}
-        <div class="card mb-4" id="step2" style="display:none;">
+        <div class="card mb-4" id="step2" style="{{ (old('delivery_type') || $errors->any()) ? '' : 'display:none;' }}">
             <div class="card-header"><strong>2. Envío o retiro</strong></div>
             <div class="card-body">
                 <select name="delivery_type" id="deliveryType"
                         class="form-control mb-3" required>
                     <option value="">Seleccione opción</option>
-                    <option value="shipping">Despacho</option>
-                    <option value="pickup">Retiro en local</option>
+                    <option value="shipping" @selected(old('delivery_type')==='shipping')>Despacho</option>
+                    <option value="pickup" @selected(old('delivery_type')==='pickup')>Retiro en local</option>
                 </select>
 
                 {{-- Campos despacho --}}
-                <div id="shippingFields" style="display:none;">
-                    <input type="text" name="commune" placeholder="Comuna"
-                           class="form-control mb-2">
-                    <input type="text" name="street" placeholder="Calle"
-                           class="form-control mb-2">
-                    <input type="text" name="number" placeholder="Número"
-                           class="form-control mb-2">
+                  <div id="shippingFields" style="{{ old('delivery_type')==='shipping' ? '' : 'display:none;' }}">
+                      <input type="text" name="commune" placeholder="Comuna"
+                          class="form-control mb-2" value="{{ old('commune') }}">
+                      <input type="text" name="street" placeholder="Calle"
+                          class="form-control mb-2" value="{{ old('street') }}">
+                      <input type="text" name="number" placeholder="Número"
+                          class="form-control mb-2" value="{{ old('number') }}">
                     <input type="text" name="extra"
                            placeholder="Dpto / Oficina (opcional)"
-                           class="form-control mb-2">
+                          class="form-control mb-2" value="{{ old('extra') }}">
                     <input type="text" name="postal_code"
                            placeholder="Código postal (opcional)"
-                           class="form-control mb-2">
+                          class="form-control mb-2" value="{{ old('postal_code') }}">
                 </div>
 
                 {{-- Campos retiro --}}
-                <div id="pickupFields" style="display:none;">
+                <div id="pickupFields" style="{{ old('delivery_type')==='pickup' ? '' : 'display:none;' }}">
                     <label>
                         <input type="radio" name="pickup_location"
                                value="Freire 1053, Concepción">
@@ -100,7 +111,7 @@
         {{-- =============================
              PASO 3: MÉTODO DE PAGO
         ============================= --}}
-        <div class="card mb-4" id="step3" style="display:none;">
+        <div class="card mb-4" id="step3" style="{{ (old('payment_method') || $errors->any()) ? '' : 'display:none;' }}">
             <div class="card-header"><strong>3. Método de pago</strong></div>
             <div class="card-body">
 
@@ -117,16 +128,23 @@
                                class="form-control mt-2"
                                min="0"
                                max="{{ auth()->user()->points_balance }}"
+                               value="{{ old('points_used') }}"
                                placeholder="¿Cuántos puntos deseas usar?">
                     </div>
                 @endif
 
                 {{-- MÉTODO DE PAGO --}}
+                @php
+                    $hasMercadoPago = filled(config('mercadopago.access_token'));
+                @endphp
                 <select name="payment_method"
                         class="form-control mb-3" required>
                     <option value="">Seleccione método</option>
-                    <option value="transfer">Transferencia bancaria</option>
-                    <option value="mercadopago">Mercado Pago</option>
+                    <option value="transfer" @selected(old('payment_method')==='transfer')>Transferencia bancaria</option>
+                    <option value="webpay" @selected(old('payment_method')==='webpay')>Webpay (Transbank)</option>
+                    @if($hasMercadoPago)
+                        <option value="mercadopago" @selected(old('payment_method')==='mercadopago')>Mercado Pago</option>
+                    @endif
                 </select>
 
                 <button type="submit"
