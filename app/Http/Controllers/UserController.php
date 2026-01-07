@@ -9,38 +9,11 @@ use App\Models\ProductCart;
 
 class UserController extends Controller
 {
-    /* =====================================================
-     |  MÉTODOS PRIVADOS
-     ===================================================== */
-
     private function cartCount(): int
     {
         return Auth::check()
             ? ProductCart::where('user_id', Auth::id())->count()
-            : 0;
-    }
-
-    private function cartTotal(): int
-    {
-        return ProductCart::where('user_id', Auth::id())
-            ->with('product')
-            ->get()
-            ->sum(fn ($item) =>
-                $item->quantity * $item->product->product_price
-            );
-    }
-
-    /* =====================================================
-     |  VISTAS PRINCIPALES
-     ===================================================== */
-
-    public function index()
-    {
-        if (Auth::user()->user_type === 'admin') {
-            return view('admin.dashboard');
-        }
-
-        return view('dashboard');
+            : collect(session('cart', []))->sum();
     }
 
     public function home()
@@ -67,117 +40,78 @@ class UserController extends Controller
         ]);
     }
 
-    /* =====================================================
-     |  CARRITO
-     ===================================================== */
+    public function addToCart(Request $request, $id)
+    {
+        $product = Product::findOrFail($id);
+        $qty = max(1, (int)$request->quantity);
+
+        if (Auth::check()) {
+            $item = ProductCart::firstOrNew([
+                'user_id' => Auth::id(),
+                'product_id' => $id
+            ]);
+
+            $item->quantity += $qty;
+            $item->save();
+        } else {
+            $cart = session('cart', []);
+            $cart[$id] = ($cart[$id] ?? 0) + $qty;
+            session(['cart' => $cart]);
+        }
+
+        return back()->with('cart_message','Producto agregado');
+    }
 
     public function cartProducts()
-    {
+{
+    if (Auth::check()) {
+        // 🧑 Usuario
         $cart = ProductCart::with('product')
             ->where('user_id', Auth::id())
             ->get();
 
-        return view('viewcartproducts', [
-            'cart'  => $cart,
-            'count' => $cart->count(),
-        ]);
+        $cartJs = $cart->map(function ($item) {
+            return [
+                'id'       => $item->id,
+                'title'    => $item->product->product_title,
+                'price'    => $item->product->final_price,
+                'quantity' => $item->quantity,
+            ];
+        });
+
+    } else {
+        // 👤 Invitado
+        $cart = collect(session('cart', []))->map(function ($qty, $id) {
+            return (object) [
+                'id'       => $id,
+                'product'  => Product::findOrFail($id),
+                'quantity' => $qty,
+            ];
+        });
+
+        $cartJs = $cart->map(function ($item) {
+            return [
+                'id'       => $item->id,
+                'title'    => $item->product->product_title,
+                'price'    => $item->product->final_price,
+                'quantity' => $item->quantity,
+            ];
+        });
     }
 
-    public function addToCart(Request $request, $id)
-    {
-        $product = Product::findOrFail($id);
-
-        $cartItem = ProductCart::where('user_id', Auth::id())
-            ->where('product_id', $id)
-            ->first();
-
-        $currentQty   = $cartItem ? $cartItem->quantity : 0;
-        $requestedQty = max(1, (int) $request->quantity);
-
-        if ($currentQty + $requestedQty > $product->product_quantity) {
-            return redirect()->back()->with(
-                'cart_error',
-                'No hay stock suficiente para agregar esa cantidad'
-            );
-        }
-
-        ProductCart::updateOrCreate(
-            [
-                'user_id'    => Auth::id(),
-                'product_id' => $id,
-            ],
-            [
-                'quantity' => $currentQty + $requestedQty,
-            ]
-        );
-
-        return redirect()->back()->with(
-            'cart_message',
-            'Producto agregado al carrito'
-        );
-    }
-
-    public function removeCartProduct($id)
-    {
-        ProductCart::where('id', $id)
-            ->where('user_id', Auth::id())
-            ->delete();
-
-        return redirect()->back()->with(
-            'cart_message',
-            'Producto eliminado del carrito'
-        );
-    }
-
-    /**
-     * AJAX: aumentar / disminuir cantidad (+ / -)
-     */
-    public function updateCart($action, $id)
-    {
-        $cart = ProductCart::where('id', $id)
-            ->where('user_id', Auth::id())
-            ->with('product')
-            ->firstOrFail();
-
-        // AUMENTAR
-        if ($action === 'increase') {
-            if ($cart->quantity >= $cart->product->product_quantity) {
-                return response()->json([
-                    'error' => 'No hay más stock disponible'
-                ]);
-            }
-            $cart->quantity++;
-        }
-
-        // DISMINUIR
-        if ($action === 'decrease') {
-            $cart->quantity--;
-
-            if ($cart->quantity <= 0) {
-                $cart->delete();
-
-                return response()->json([
-                    'removed' => true,
-                    'total'   => $this->cartTotal()
-                ]);
-            }
-        }
-
-        $cart->save();
-
-        return response()->json([
-            'quantity' => $cart->quantity,
-            'total'    => $this->cartTotal()
-        ]);
-    }
-    public function searchProducts(Request $request)
-{
-    $query = $request->input('query');
-
-    $products = Product::where('product_title', 'like', "%{$query}%")
-                        ->orWhere('product_description', 'like', "%{$query}%")
-                        ->get();
-
-    return view('allproducts', compact('products'));
+    return view('viewcartproducts', [
+        'cart'   => $cart,
+        'cartJs' => $cartJs,
+        'count'  => $cart->count(),
+    ]);
 }
+
+
+    public function searchProducts(Request $request)
+    {
+        return view('allproducts',[
+            'products'=>Product::where('product_title','like','%'.$request->query.'%')->get(),
+            'count'=>$this->cartCount()
+        ]);
+    }
 }

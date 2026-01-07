@@ -1,1 +1,76 @@
-/* your styles go here */
+/* =========================
+   FIX DEFINITIVO FRANJA BLANCA ADMIN
+========================= */
+
+/* Reset general */
+html, body {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+/* Sidebar fijo */
+.side-navbar {
+    width: 250px;
+    min-width: 250px;
+}
+
+/* Layout flex correcto */
+.page-content {
+    display: flex;
+    width: 100%;
+}
+
+/* Contenido ocupa SOLO el espacio restante */
+.content-inner {
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: 100%;
+}
+
+/* 🚨 CLAVE: neutralizar Bootstrap container-fluid SOLO EN ADMIN */
+.content-inner .container-fluid {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding-left: 15px;
+    padding-right: 15px;
+    overflow-x: hidden;
+}
+
+/* Evitar que tablas empujen el layout */
+.table-responsive {
+    overflow-x: auto;
+}
+
+/* =========================
+   ESTADOS DE PAGO
+========================= */
+
+.badge {
+    font-size: 0.85rem;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-weight: 600;
+}
+
+/* =========================
+   TABLAS
+========================= */
+
+.table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+}
+
+.table td,
+.table th {
+    vertical-align: middle;
+}
+
+/* =========================
+   BOTONES
+========================= */
+
+.btn {
+    border-radius: 6px;
+}

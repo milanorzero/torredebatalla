@@ -123,4 +123,8 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    'contact_address' => env('CONTACT_ADDRESS', 'Freire 1053, Concepción, Chile'),
+    'contact_map_query' => env('CONTACT_MAP_QUERY', 'Freire 1053, Concepción, Chile'),
+    'contact_to_email' => env('CONTACT_TO_EMAIL', 'alonsobustos96@gmail.com'),
+
 ];

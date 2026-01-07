@@ -6,6 +6,7 @@ services:
     container_name: torredebatalla_app
     volumes:
       - .:/var/www/html
+      - ./docker/php/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini:ro
     depends_on:
       - mysql
     networks:

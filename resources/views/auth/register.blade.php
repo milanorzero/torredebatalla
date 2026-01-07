@@ -1,52 +1,94 @@
-<x-guest-layout>
-    <form method="POST" action="{{ route('register') }}">
-        @csrf
+@extends('maindesign')
 
-        <!-- Name -->
-        <div>
-            <x-input-label for="name" :value="__('Name')" />
-            <x-text-input id="name" class="block mt-1 w-full" type="text" name="name" :value="old('name')" required autofocus autocomplete="name" />
-            <x-input-error :messages="$errors->get('name')" class="mt-2" />
+@section('title', 'Crear cuenta')
+
+@section('shop')
+<div class="container" style="max-width: 520px;">
+    <div class="card shadow-sm">
+        <div class="card-body p-4">
+
+            <h2 class="text-center mb-2">
+                Crear cuenta
+            </h2>
+
+            <p class="text-center text-muted mb-4">
+                Únete a <strong>Torre de Batalla</strong> y comienza a jugar 🃏
+            </p>
+
+            <form method="POST" action="{{ route('register') }}">
+                @csrf
+
+                {{-- NOMBRE --}}
+                <div class="form-group mb-3">
+                    <label>Nombre completo</label>
+                    <input
+                        type="text"
+                        name="name"
+                        value="{{ old('name') }}"
+                        class="form-control"
+                        placeholder="Tu nombre completo"
+                        required
+                    >
+                    @error('name')
+                        <small class="text-danger">{{ $message }}</small>
+                    @enderror
+                </div>
+
+                {{-- EMAIL --}}
+                <div class="form-group mb-3">
+                    <label>Correo electrónico</label>
+                    <input
+                        type="email"
+                        name="email"
+                        value="{{ old('email') }}"
+                        class="form-control"
+                        placeholder="correo@ejemplo.com"
+                        required
+                    >
+                    @error('email')
+                        <small class="text-danger">{{ $message }}</small>
+                    @enderror
+                </div>
+
+                {{-- CONTRASEÑA --}}
+                <div class="form-group mb-3">
+                    <label>Contraseña</label>
+                    <input
+                        type="password"
+                        name="password"
+                        class="form-control"
+                        placeholder="Mínimo 8 caracteres"
+                        required
+                    >
+                    @error('password')
+                        <small class="text-danger">{{ $message }}</small>
+                    @enderror
+                </div>
+
+                {{-- CONFIRMAR CONTRASEÑA --}}
+                <div class="form-group mb-4">
+                    <label>Confirmar contraseña</label>
+                    <input
+                        type="password"
+                        name="password_confirmation"
+                        class="form-control"
+                        placeholder="Repite tu contraseña"
+                        required
+                    >
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100">
+                    Crear cuenta
+                </button>
+
+                <div class="text-center mt-3">
+                    <a href="{{ route('login') }}">
+                        ¿Ya tienes cuenta? Inicia sesión
+                    </a>
+                </div>
+
+            </form>
         </div>
-
-        <!-- Email Address -->
-        <div class="mt-4">
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autocomplete="username" />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
-        </div>
-
-        <!-- Password -->
-        <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
-
-            <x-text-input id="password" class="block mt-1 w-full"
-                            type="password"
-                            name="password"
-                            required autocomplete="new-password" />
-
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
-        </div>
-
-        <!-- Confirm Password -->
-        <div class="mt-4">
-            <x-input-label for="password_confirmation" :value="__('Confirm Password')" />
-
-            <x-text-input id="password_confirmation" class="block mt-1 w-full"
-                            type="password"
-                            name="password_confirmation" required autocomplete="new-password" />
-
-            <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
-        </div>
-
-        <div class="flex items-center justify-end mt-4">
-            <a class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800" href="{{ route('login') }}">
-                {{ __('Already registered?') }}
-            </a>
-
-            <x-primary-button class="ms-4">
-                {{ __('Register') }}
-            </x-primary-button>
-        </div>
-    </form>
-</x-guest-layout>
+    </div>
+</div>
+@endsection

@@ -1,46 +1,149 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\AdminController;
 use App\Http\Controllers\Controller;
-Route::get('/',[UserController::class,'home'])->name('index');
-Route::get('/events', [Controller::class, 'events'])->name('events');
-Route::get('/contact', [Controller::class, 'contact'])->name('contact');
-Route::get('/blog', [Controller::class, 'blog'])->name('blog');
-Route::get('/product_details/{id}',[UserController::class,'productDetails'])->name('product_details');
-Route::get('/allproducts',[UserController::class,'viewAllProducts'])->name('view_allproducts');
-Route::get('/search', [UserController::class, 'searchProducts'])->name('search_products');
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\Admin\OrderAdminController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Admin\PosController;
+use App\Http\Controllers\Admin\PointController;
+use App\Http\Controllers\Admin\StorageController;
+use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\MercadoPagoController;
+use App\Http\Controllers\ContactController;
+use App\Models\Order;
 
-Route::get('/dashboard',[UserController::class,'index'])->middleware(['auth', 'verified'])->name('dashboard');
-Route::post('/addtocart/{id}',[UserController::class,'addToCart'])->middleware(['auth', 'verified'])->name('add_to_cart');
-Route::get('/cartproducts',[UserController::class,'CartProducts'])->middleware(['auth', 'verified'])->name('cartproducts');
-Route::get('/removecartproduct/{id}',[UserController::class,'removeCartProduct'])->middleware(['auth', 'verified'])->name('removecartproduct');
+/*
+|--------------------------------------------------------------------------
+| PUBLIC
+|--------------------------------------------------------------------------
+*/
+
+Route::get('/', [UserController::class, 'home'])->name('index');
+Route::get('/product_details/{id}', [UserController::class, 'productDetails'])->name('product_details');
+Route::get('/allproducts', [UserController::class, 'viewAllProducts'])->name('view_allproducts');
+Route::get('/search', [UserController::class, 'searchProducts'])->name('search_products');
+Route::get('/events', [Controller::class, 'events'])->name('events');
+Route::get('/ligas', [Controller::class, 'events'])->name('ligas');
+Route::view('/blog', 'blog')->name('blog');
+Route::get('/contacto', [ContactController::class, 'show'])->name('contacto');
+Route::post('/contacto', [ContactController::class, 'send'])->name('contacto.send');
+/*
+|--------------------------------------------------------------------------
+| CART (INVITADO + USUARIO)
+|--------------------------------------------------------------------------
+*/
+
+/*
+|--------------------------------------------------------------------------
+| CART (INVITADO + USUARIO)
+|--------------------------------------------------------------------------
+*/
+
+Route::post('/addtocart/{id}', [UserController::class, 'addToCart'])
+    ->name('add_to_cart');
+
+Route::get('/cartproducts', [UserController::class, 'cartProducts'])
+    ->name('cartproducts');
+
+Route::get('/removecartproduct/{id}', [UserController::class, 'removeCartProduct'])
+    ->name('removecartproduct');
 
 Route::post('/cart/{action}/{id}', [UserController::class, 'updateCart'])
-    ->middleware('auth');
+    ->name('cart.update');
 
+/*
+|--------------------------------------------------------------------------
+| CHECKOUT (SIN AUTH)
+|--------------------------------------------------------------------------
+*/
+
+Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout');
+Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
+
+Route::get('/checkout/success/{order}', function (Order $order) {
+    return redirect()
+        ->route('index')
+        ->with('success', "Orden #{$order->id} creada correctamente.");
+})->name('checkout.success');
+
+Route::get('/pagar/mercadopago', [MercadoPagoController::class, 'init'])->name('mercadopago.init');
+
+// Checkout Bricks (checkout embebido)
+Route::get('/mercadopago/bricks/checkout', [MercadoPagoController::class, 'bricksCheckout'])
+    ->name('mercadopago.bricks.checkout');
+Route::post('/mercadopago/bricks/process_payment', [MercadoPagoController::class, 'bricksProcessPayment'])
+    ->name('mercadopago.bricks.process_payment');
+Route::get('/mercadopago/bricks/status/{paymentId}', [MercadoPagoController::class, 'bricksStatus'])
+    ->whereNumber('paymentId')
+    ->name('mercadopago.bricks.status');
+
+Route::get('/mercadopago/return', [MercadoPagoController::class, 'return'])->name('mercadopago.return');
+Route::post('/mercadopago/webhook', [MercadoPagoController::class, 'webhook'])
+    ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class])
+    ->name('mercadopago.webhook');
+
+Route::get('/payment/transfer/{order}', [PaymentController::class, 'transfer'])->name('payment.transfer');
+Route::post('/payment/transfer/{order}/upload', [PaymentController::class, 'uploadTransferProof'])->name('payment.transfer.upload');
+
+// Fallback for hosts that don't allow symlinks (storage:link)
+Route::middleware(['auth', 'admin'])->group(function () {
+    Route::get('/storage/payments/{path}', [StorageController::class, 'paymentProof'])
+        ->where('path', '.*')
+        ->name('admin.storage.payments');
+});
+
+/*
+|--------------------------------------------------------------------------
+| ADMIN
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware(['auth','admin'])->prefix('admin')->name('admin.')->group(function () {
+
+    Route::get('/dashboard', fn () => view('admin.dashboard'))->name('dashboard');
+
+    Route::get('/pos', [PosController::class, 'create'])->name('pos.create');
+    Route::post('/pos', [PosController::class, 'store'])->name('pos.store');
+
+    Route::get('/points', [PointController::class, 'create'])->name('points.create');
+    Route::post('/points', [PointController::class, 'store'])->name('points.store');
+
+    Route::get('/products', [AdminController::class, 'viewProduct'])->name('viewproduct');
+    Route::get('/products/add', [AdminController::class, 'addProduct'])->name('addproduct');
+    Route::post('/products/add', [AdminController::class, 'postAddProduct'])->name('postaddproduct');
+
+    Route::get('/products/update/{id}', [AdminController::class, 'updateProduct'])->name('updateproduct');
+    Route::post('/products/update/{id}', [AdminController::class, 'postUpdateproduct'])->name('postupdateproduct');
+    Route::get('/products/delete/{id}', [AdminController::class, 'deleteProduct'])->name('deleteproduct');
+
+    Route::get('/categories/add', [AdminController::class, 'addCategory'])->name('addcategory');
+    Route::post('/categories/add', [AdminController::class, 'postAddCategory'])->name('postaddcategory');
+    Route::get('/categories', [AdminController::class, 'viewCategory'])->name('viewcategory');
+    Route::get('/categories/delete/{id}', [AdminController::class, 'deleteCategory'])->name('categorydelete');
+    Route::get('/categories/update/{id}', [AdminController::class, 'updateCategory'])->name('categoryupdate');
+    Route::post('/categories/update/{id}', [AdminController::class, 'postupdateCategory'])->name('postupdatecategory');
+
+    Route::get('/orders', [OrderAdminController::class, 'index'])->name('orders.index');
+    Route::get('/orders/{order}', [OrderAdminController::class, 'show'])->name('orders.show');
+    Route::get('/orders/{order}/payment-proof', [OrderAdminController::class, 'paymentProof'])->name('orders.payment-proof');
+    Route::post('/orders/{order}/approve', [OrderAdminController::class, 'approve'])->name('orders.approve');
+    Route::post('/orders/{order}/reject', [OrderAdminController::class, 'reject'])->name('orders.reject');
+    Route::post('/orders/{order}/cancel', [OrderAdminController::class, 'cancel'])->name('orders.cancel');
+});
+
+/*
+|--------------------------------------------------------------------------
+| PROFILE
+|--------------------------------------------------------------------------
+*/
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-});
-
-Route::middleware('admin')->group(function () {
-    Route::get('/add_category', [AdminController::class, 'addCategory'])->name('admin.addcategory');
-    Route::post('/add_category', [AdminController::class, 'postAddCategory'])->name('admin.postaddcategory');
-    Route::get('/view_category', [AdminController::class, 'viewCategory'])->name('admin.viewcategory');
-    Route::get('/delete_category/{id}', [AdminController::class, 'deleteCategory'])->name('admin.categorydelete');
-    Route::get('/update_category/{id}', [AdminController::class, 'updateCategory'])->name('admin.categoryupdate');
-    Route::post('/update_category/{id}', [AdminController::class, 'postupdateCategory'])->name('admin.postupdatecategory');
-    Route::get('/add_product', [AdminController::class, 'addProduct'])->name('admin.addproduct');
-    Route::post('/add_product', [AdminController::class, 'postAddProduct'])->name('admin.postaddproduct');
-    Route::get('/view_product', [AdminController::class, 'viewProduct'])->name('admin.viewproduct');
-    Route::get('/delete_product/{id}', [AdminController::class, 'deleteProduct'])->name('admin.deleteproduct');
-    Route::get('/update_product/{id}', [AdminController::class, 'updateProduct'])->name('admin.updateproduct');
-    Route::post('/update_product/{id}', [AdminController::class, 'postUpdateproduct'])->name('admin.postupdateproduct');
 });
 
 require __DIR__.'/auth.php';

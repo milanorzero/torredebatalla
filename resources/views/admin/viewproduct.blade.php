@@ -1,51 +1,100 @@
 @extends('admin.maindesign')
 
-@section('view_category')
+@section('page_title', 'Productos')
 
-@if(session('deletecategory_message'))
-<div style="margin-bottom: 10px; color: black; background-color: orangered;">
-    {{session('deletecategory_message')}}
-</div>
-@endif
+@section('content')
 
 @if(session('deleteproduct_message'))
-<div style="margin-bottom: 10px; color: black; background-color: orangered;">
-    {{session('deleteproduct_message')}}
-</div>
+    <div class="alert alert-danger mb-3">
+        {{ session('deleteproduct_message') }}
+    </div>
 @endif
-<table style="width: 100%; border-collapse: collapse; font-family: Arial, sans-serif;">
-  <thead>
-    <tr style="background-color: #f2f2f2;">
-      <th style="padding: 12px; text-align: left; border-bottom: 1px solid #ddd;">Producto</th>
-      <th style="padding: 12px; text-align: left; border-bottom: 1px solid #ddd;">Descripcion del producto</th>
-      <th style="padding: 12px; text-align: left; border-bottom: 1px solid #ddd;">Cantidad</th>
-      <th style="padding: 12px; text-align: left; border-bottom: 1px solid #ddd;">Precio</th>
-      <th style="padding: 12px; text-align: left; border-bottom: 1px solid #ddd;">Imagen</th>
-      <th style="padding: 12px; text-align: left; border-bottom: 1px solid #ddd;">Categoria</th>
-      <th style="padding: 12px; text-align: left; border-bottom: 1px solid #ddd;">Accion</th>
-    </tr>
-  </thead>
-  <tbody>
-    @foreach($products as $product)
-    <tr style="border-bottom: 1px solid #ddd;">
-      <td style="padding: 12px;">{{$product->product_title}}</td>
-      <td style="padding: 12px;">{{Str::limit($product->product_description,150)}}</td>
-      <td style="padding: 12px;">{{$product->product_quantity}}</td>
-      <td style="padding: 12px;">{{$product->product_price}}</td>
-      <td style="padding: 12px;">
-        <img style="width: 150px;"src="{{asset('products/'.$product->product_image)}}">
-      </td>
-      <td style="padding: 12px;">{{$product->product_category}}</td>
-      <td style="padding: 12px;">
-        <a href="{{route('admin.updateproduct',$product->id)}}" style="color:green">Actualizar</a>
-         <a href="{{route('admin.deleteproduct',$product->id)}}" onclick="return confirm('Confirma borrar categoria')" >Borrar</a>
-      </td>
-    </tr>
-    @endforeach
 
-    {{$products->links()}}
-  </tbody>
-</table>
+<div class="container-fluid">
 
+    <div class="card">
+        <div class="card-header">
+            <strong>Listado de productos</strong>
+        </div>
+
+        <div class="card-body">
+            <table class="table table-bordered table-striped align-middle">
+                <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th>Descripción</th>
+                        <th>Cantidad</th>
+                        <th>Precio</th>
+                        <th>Canal</th>
+                        <th>Imagen</th>
+                        <th>Categoría</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @foreach($products as $product)
+                        <tr>
+                            <td>{{ $product->product_title }}</td>
+
+                            <td>
+                                {{ \Illuminate\Support\Str::limit($product->product_description, 120) }}
+                            </td>
+
+                            <td>
+                                {{ $product->product_quantity }}
+                            </td>
+
+                            <td>
+                                ${{ number_format($product->final_price, 0, ',', '.') }}
+                            </td>
+
+                            <td>
+                                @if($product->sale_channel === 'web')
+                                    <span class="badge badge-info">Web</span>
+                                @elseif($product->sale_channel === 'store')
+                                    <span class="badge badge-warning">Tienda física</span>
+                                @else
+                                    <span class="badge badge-success">Web + Tienda</span>
+                                @endif
+                            </td>
+
+                            <td>
+                                @if($product->product_image)
+                                    <img src="{{ asset('products/' . $product->product_image) }}"
+                                         style="max-width: 100px;">
+                                @else
+                                    <span class="text-muted">Sin imagen</span>
+                                @endif
+                            </td>
+
+                            <td>
+                                {{ $product->product_category }}
+                            </td>
+
+                            <td>
+                                <a href="{{ route('admin.updateproduct', $product->id) }}"
+                                   class="btn btn-sm btn-warning mb-1">
+                                    Editar
+                                </a>
+
+                                <a href="{{ route('admin.deleteproduct', $product->id) }}"
+                                   class="btn btn-sm btn-danger"
+                                   onclick="return confirm('¿Confirma borrar producto?')">
+                                    Eliminar
+                                </a>
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+
+            <div class="mt-3">
+                {{ $products->links() }}
+            </div>
+        </div>
+    </div>
+
+</div>
 
 @endsection

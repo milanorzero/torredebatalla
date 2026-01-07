@@ -20,7 +20,7 @@
                         </div>
                         <div class="col-md-5">
                             <div class="img-box">
-                                <img style="width:600px" src="{{ asset('front_end/images/image3.jpg') }}" alt="" />
+                                <img style="width:600px" src="{{ asset('front_end/images/logo.png') }}" alt="" />
                             </div>
                         </div>
                     </div>

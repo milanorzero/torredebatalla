@@ -1,22 +1,45 @@
 @extends('admin.maindesign')
 
+@section('page_title', 'Agregar categoría')
 
-@section('add_category')
+@section('content')
 
     @if(session('category_message'))
-         <div class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative">
-           {{ session(  'category_message' ) }}
-           </div>
+        <div class="alert alert-success mb-3">
+            {{ session('category_message') }}
+        </div>
     @endif
-     <div class="container-fluid">
-        
-        <form action="{{route('admin.postaddcategory')}}" method="POST">
-            @csrf
-            <input type="text" name="category" placeholder="Ingresar categoria">
-            <input type=submit name="submit" value="Add Category">
-        </form>
 
+    <div class="container-fluid">
 
-     </div>
+        <div class="card">
+            <div class="card-header">
+                <strong>Nueva categoría</strong>
+            </div>
+
+            <div class="card-body">
+                <form action="{{ route('admin.postaddcategory') }}" method="POST">
+                    @csrf
+
+                    <div class="form-group">
+                        <label for="category">Nombre de la categoría</label>
+                        <input
+                            type="text"
+                            name="category"
+                            id="category"
+                            class="form-control"
+                            placeholder="Ingresar categoría"
+                            required
+                        >
+                    </div>
+
+                    <button type="submit" class="btn btn-primary mt-2">
+                        Agregar categoría
+                    </button>
+                </form>
+            </div>
+        </div>
+
+    </div>
 
 @endsection

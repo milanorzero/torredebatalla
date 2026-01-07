@@ -67,6 +67,11 @@
             </tbody>
         </table>
     </div>
+    <div class="text-right mt-4">
+    <a href="{{ route('checkout') }}" class="btn btn-success btn-lg">
+        Continuar a Pago
+    </a>
+</div>
 @endif
 
 {{-- Datos para JS --}}
