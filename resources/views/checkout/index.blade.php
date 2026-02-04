@@ -141,7 +141,6 @@
                         class="form-control mb-3" required>
                     <option value="">Seleccione método</option>
                     <option value="transfer" @selected(old('payment_method')==='transfer')>Transferencia bancaria</option>
-                    <option value="webpay" @selected(old('payment_method')==='webpay')>Webpay (Transbank)</option>
                     @if($hasMercadoPago)
                         <option value="mercadopago" @selected(old('payment_method')==='mercadopago')>Mercado Pago</option>
                     @endif

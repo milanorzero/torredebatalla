@@ -32,11 +32,8 @@
 
     <!-- HEADER -->
     <header class="header_section">
-        <nav class="navbar navbar-expand-lg custom_nav-container">
 
-            <a class="navbar-brand" href="{{ route('index', [], false) }}">
-                <span>Torre de Batalla</span>
-            </a>
+        <nav class="navbar navbar-expand-lg custom_nav-container">
 
             <button class="navbar-toggler" type="button" data-toggle="collapse"
                 data-target="#navbarSupportedContent">
@@ -47,7 +44,8 @@
 
                 <!-- NAV LINKS -->
                 <ul class="navbar-nav">
-
+                    <img src="{{ asset('front_end/images/logo.png') }}" alt="Logo" style="height: 40px; width: auto; display: block;">
+                    
                     <li class="nav-item">
                         <a class="nav-link" href="{{ route('index', [], false) }}">Home</a>
                     </li>
@@ -56,8 +54,23 @@
                         <a class="nav-link" href="{{ route('view_allproducts', [], false) }}">Tienda</a>
                     </li>
 
+                    @if(($navCategories ?? collect())->count())
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navCategories" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Categorías
+                            </a>
+                            <div class="dropdown-menu" aria-labelledby="navCategories">
+                                <a class="dropdown-item" href="{{ route('view_allproducts', [], false) }}">Ver todo</a>
+                                <div class="dropdown-divider"></div>
+                                @foreach($navCategories as $cat)
+                                    <a class="dropdown-item" href="{{ route('view_allproducts', ['category' => $cat->category], false) }}">{{ $cat->category }}</a>
+                                @endforeach
+                            </div>
+                        </li>
+                    @endif
+
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ route('ligas', [], false) }}">Ligas</a>
+                        <a class="nav-link" href="{{ route('events', [], false) }}">Eventos</a>
                     </li>
 
                     <li class="nav-item">
@@ -84,6 +97,26 @@
                 <!-- USER / CART -->
                 <div class="user_option">
 
+                    <!-- SEARCH ICON (DROPDOWN) -->
+                    <div class="dropdown d-inline-block" style="margin-right: 18px;">
+                        <a href="#" class="dropdown-toggle" id="navbarSearchDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="color: inherit;">
+                            <i class="fa fa-search" aria-hidden="true"></i>
+                            <span class="sr-only">Buscar</span>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-right p-2" aria-labelledby="navbarSearchDropdown" style="min-width: 280px;">
+                            <form action="{{ route('search_products', [], false) }}" method="GET" class="m-0">
+                                <div class="input-group">
+                                    <input type="text" name="query" class="form-control" placeholder="Buscar productos..." value="{{ request('query') }}" aria-label="Buscar">
+                                    <div class="input-group-append">
+                                        <button class="btn btn-primary" type="submit">
+                                            <i class="fa fa-search" aria-hidden="true"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
                     {{-- USUARIO LOGUEADO --}}
                     @auth
 
@@ -98,11 +131,16 @@
                             {{ auth()->user()->name }}
                         </span>
 
-                        {{-- 🔹 PUNTOS --}}
+                        {{-- 馃敼 PUNTOS --}}
                         <span style="margin-right:10px;">
                             <i class="fa fa-star text-warning"></i>
                             {{ auth()->user()->points_balance }} pts
                         </span>
+
+                        <a href="{{ route('points.history', [], false) }}" style="margin-right:10px;">
+                            <i class="fa fa-list"></i>
+                            <span>Historial</span>
+                        </a>
 
                         {{-- LOGOUT --}}
                         <form method="POST" action="{{ route('logout', [], false) }}" style="display:inline;">
@@ -132,7 +170,7 @@
                     {{-- CARRITO --}}
                     <a href="{{ route('cartproducts', [], false) }}">
                         <i class="fa fa-shopping-bag"></i>
-                        <span>{{ $count ?? 0 }}</span>
+                        <span>{{ $count ?? ($navCartCount ?? 0) }}</span>
                     </a>
 
                 </div>

@@ -4,7 +4,7 @@
 
 @section('shop')
 <div class="container" style="max-width: 600px;">
-    <div class="card shadow-sm">
+    <div class="card shadow-sm w-100">
         <div class="card-body p-4">
 
             <h2 class="text-center mb-3">

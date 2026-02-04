@@ -10,13 +10,13 @@
     <p class="text-center">No hay productos en el carrito.</p>
 @else
     <div class="table-responsive">
-        <table class="table table-bordered text-center">
+        <table class="table table-bordered text-center align-middle">
             <thead class="thead-light">
                 <tr>
                     <th>Producto</th>
                     <th>Precio</th>
                     <th>Cantidad</th>
-                    <th>Imagen</th>
+                    <th class="d-none d-sm-table-cell">Imagen</th>
                     <th>Acción</th>
                 </tr>
             </thead>
@@ -28,19 +28,19 @@
 
                 @foreach ($cart as $item)
                     @php
-                        $subtotal = $item->quantity * $item->product->product_price;
+                        $subtotal = $item->quantity * $item->product->final_price;
                         $total += $subtotal;
 
                         $cartJs[$item->id] = [
                             'qty'   => $item->quantity,
-                            'price' => $item->product->product_price,
+                            'price' => $item->product->final_price,
                             'stock' => $item->product->product_quantity,
                         ];
                     @endphp
 
                     <tr id="row-{{ $item->id }}">
                         <td>{{ $item->product->product_title }}</td>
-                        <td>${{ number_format($item->product->product_price, 0, ',', '.') }}</td>
+                        <td>${{ number_format($item->product->final_price, 0, ',', '.') }}</td>
                         <td>
                             <button class="btn btn-sm btn-outline-secondary" onclick="updateCart({{ $item->id }}, 'decrease')">−</button>
                             <span id="qty-{{ $item->id }}" class="mx-2 font-weight-bold">{{ $item->quantity }}</span>

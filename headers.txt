@@ -1,0 +1,13 @@
+HTTP/1.1 200 OK
+Server: nginx/1.29.4
+Content-Type: text/html; charset=utf-8
+Transfer-Encoding: chunked
+Connection: keep-alive
+X-Powered-By: PHP/8.2.30
+Cache-Control: no-cache, private
+Date: Wed, 04 Feb 2026 07:55:03 GMT
+X-App: torredebatalla
+X-Request-Id: f14adf92-6572-4fbd-8fa3-733bc5e37773
+Set-Cookie: XSRF-TOKEN=eyJpdiI6ImQxUmdCZmtwdlR3T2RjQmNwZHBNa1E9PSIsInZhbHVlIjoidFJwVUdXUjRNUnRjdFA0M2x0VmZibUxpT2ZGRWNPdnpUOEV1ZGk4Q3EyK05EQ3NsZUF3dVd3Wk5HcG00UHlFZlVWemp2M0daMllpalF5OVd5QTJiLzlCem1JTVVBV0JXMlArT21hOG1Bb2pRL3BkTkh3TmxtdTc4bjFsM0dEbW0iLCJtYWMiOiJjOTQ3YzkyY2FkMmMyNGFmMzI5YTIxYjk1NWUxM2RhN2FjZTMyMGI5MzQ4NGE4YzYwMmUwMjY5Zjc1OTMwZWIzIiwidGFnIjoiIn0%3D; expires=Wed, 04 Feb 2026 09:55:04 GMT; Max-Age=7200; path=/; samesite=lax
+Set-Cookie: torredebatalla-session=eyJpdiI6ImVZMWZWdUVKRHdrWG9HMTdZUmp6enc9PSIsInZhbHVlIjoiT2oyaVdndmhrRWFVQkF5Mml3THVSM1Z1Rkg5U25ZVkRhdlBEMWVTeWI1MmhPTTR6aFNRQzlsTzBUWFhGNDF6dVhLWnF1VHpjMkJIb3J1RmUrWTdPSHNpSytCWG1UZ0dXU2cyRHdOeitYZlhXZDFVbkRTdElXWEQza3UrNURaK00iLCJtYWMiOiJlMzhhZGNhZDI5N2JmNDkxZGI4ZDk5NGQ5Zjk2ZDU4MTFiOTIzYjkxMzg3N2E4Njk0MDdjNjY4ZmM0ZmZhZTVlIiwidGFnIjoiIn0%3D; expires=Wed, 04 Feb 2026 09:55:04 GMT; Max-Age=7200; path=/; httponly; samesite=lax
+

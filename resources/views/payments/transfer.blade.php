@@ -36,7 +36,7 @@
             <p><strong>Banco:</strong> MercadoPago</p>
             <p><strong>Tipo de cuenta:</strong> Cuenta Vista</p>
             <p><strong>N° de cuenta:</strong> 1091256512</p>
-            <p><strong>Email:</strong> grupofogos@gmail.com</p>
+            <p><strong>Email:</strong> {{ config('app.contact_to_email') }}</p>
         </div>
     </div>
 

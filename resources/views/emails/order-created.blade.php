@@ -33,8 +33,4 @@
     <p>Serás redirigido a Mercado Pago para completar el pago.</p>
 @endif
 
-@if($order->metodo_pago === 'webpay')
-    <p>Serás redirigido a Webpay (Transbank) para completar el pago.</p>
-@endif
-
 <p>Gracias por comprar en Torre de Batalla.</p>

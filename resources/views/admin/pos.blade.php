@@ -9,7 +9,7 @@
         @csrf
 
         {{-- CLIENTE --}}
-        <div class="card mb-4">
+        <div class="card mb-4 w-100">
             <div class="card-body">
                 <h5 class="mb-3">Cliente</h5>
 
@@ -27,17 +27,17 @@
         </div>
 
         {{-- PRODUCTOS --}}
-        <div class="card mb-4">
+        <div class="card mb-4 w-100">
             <div class="card-body">
                 <h5 class="mb-3">Productos</h5>
 
                 @foreach($products as $product)
                     <div class="row align-items-center mb-2 product-row"
                          data-price="{{ $product->final_price }}">
-                        <div class="col-md-6">
+                        <div class="col-12 col-md-6">
                             {{ $product->product_title }}
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-12 col-md-3 mt-2 mt-md-0">
                             ${{ number_format($product->final_price) }}
                         </div>
                         <div class="col-md-3">

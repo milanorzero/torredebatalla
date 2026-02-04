@@ -79,6 +79,7 @@ class AdminController extends Controller
             'product_quantity'=> 'required|integer|min:0',
             'product_price'   => 'required|numeric|min:0',
             'sale_channel'    => 'required|in:web,store,both',
+            'is_tournament'   => 'nullable|boolean',
         ]);
 
         $product = new Product();
@@ -88,12 +89,18 @@ class AdminController extends Controller
         $product->product_price       = $request->product_price;
         $product->product_category    = $request->product_category;
         $product->sale_channel        = $request->sale_channel;
+        $product->is_tournament       = $request->boolean('is_tournament');
 
         if ($request->hasFile('product_image')) {
             $image     = $request->file('product_image');
             $imagename = time() . '.' . $image->getClientOriginalExtension();
-            $image->move(public_path('products'), $imagename);
-            $product->product_image = $imagename;
+            try {
+                $destino = base_path('../public_html/products');
+                $image->move($destino, $imagename);
+                $product->product_image = $imagename;
+            } catch (\Exception $e) {
+                return redirect()->back()->withErrors(['product_image' => 'Error al guardar la imagen: ' . $e->getMessage()]);
+            }
         }
 
         $product->save();
@@ -104,7 +111,16 @@ class AdminController extends Controller
 
     public function viewProduct()
     {
-        $products = Product::paginate(5);
+        $type = request('type');
+
+        $query = Product::query();
+        if ($type === 'tournaments') {
+            $query->where('is_tournament', true);
+        } elseif ($type === 'products') {
+            $query->where('is_tournament', false);
+        }
+
+        $products = $query->paginate(5)->appends(request()->query());
         return view('admin.viewproduct', compact('products'));
     }
 
@@ -143,6 +159,7 @@ class AdminController extends Controller
         $product->product_price       = $request->product_price;
         $product->product_category    = $request->product_category;
         $product->sale_channel        = $request->sale_channel;
+        $product->is_tournament       = $request->boolean('is_tournament');
 
         if ($request->hasFile('product_image')) {
             if ($product->product_image) {

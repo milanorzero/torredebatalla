@@ -12,6 +12,7 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use App\Mail\OrderPaidMail;
+use Illuminate\Support\Facades\DB;
 
 class OrderAdminController extends Controller
 {
@@ -117,9 +118,17 @@ class OrderAdminController extends Controller
                 ->with('error', 'Solo se pueden rechazar órdenes pendientes.');
         }
 
-        $order->update([
-            'estado_pago' => 'rechazado'
-        ]);
+        DB::transaction(function () use ($order): void {
+            $order->refresh();
+            if ($order->estado_pago !== 'pendiente') {
+                return;
+            }
+
+            $order->restockProducts();
+            $order->update([
+                'estado_pago' => 'rechazado'
+            ]);
+        });
 
         return redirect()
             ->back()
@@ -137,9 +146,17 @@ class OrderAdminController extends Controller
                 ->with('error', 'Solo se pueden cancelar órdenes pendientes.');
         }
 
-        $order->update([
-            'estado_pago' => 'cancelado',
-        ]);
+        DB::transaction(function () use ($order): void {
+            $order->refresh();
+            if ($order->estado_pago !== 'pendiente') {
+                return;
+            }
+
+            $order->restockProducts();
+            $order->update([
+                'estado_pago' => 'cancelado',
+            ]);
+        });
 
         return redirect()
             ->back()

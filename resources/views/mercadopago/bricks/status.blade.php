@@ -6,7 +6,7 @@
 <div class="container">
     <h2 class="mb-4">Estado del pago</h2>
 
-    <div class="card mb-4">
+    <div class="card mb-4 w-100">
         <div class="card-header"><strong>Orden</strong></div>
         <div class="card-body">
             <p class="mb-1"><strong>Orden:</strong> #{{ $order->id }}</p>
@@ -15,7 +15,7 @@
         </div>
     </div>
 
-    <div class="card">
+    <div class="card w-100">
         <div class="card-header"><strong>Detalle del pago</strong></div>
         <div class="card-body">
             <div id="statusScreenBrick_container"></div>

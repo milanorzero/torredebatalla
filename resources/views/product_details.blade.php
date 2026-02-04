@@ -15,32 +15,49 @@
     <div class="container">
         <div class="row">
             <!-- Imagen del producto -->
-            <div class="col-md-6">
-                <div class="img-box text-center">
+            <div class="col-12 col-md-6 mb-4 mb-md-0 d-flex align-items-center justify-content-center">
+                <div class="img-box text-center w-100">
                     <img src="{{ asset('products/' . $product->product_image) }}" 
                          alt="{{ $product->product_title }}" 
-                         class="img-fluid" 
+                         class="img-fluid w-100" 
                          style="max-height: 400px; object-fit: contain;">
                 </div>
             </div>
 
             <!-- Detalles del producto -->
-            <div class="col-md-6">
+            <div class="col-12 col-md-6 d-flex flex-column">
                 <h2>{{ $product->product_title }}</h2>
 
                 <p class="mt-3">
                     {{ $product->product_description }}
                 </p>
 
-                <h4 class="text-success mt-3">
-                    ${{ number_format($product->product_price) }}
-                </h4>
+                @if($product->is_on_offer && $product->offer_price)
+                    <div class="mt-3">
+                        <span class="text-muted" style="text-decoration: line-through; font-size: 18px;">
+                            ${{ number_format((int) $product->product_price, 0, ',', '.') }}
+                        </span>
+                        <span class="text-success font-weight-bold" style="font-size: 24px; margin-left: 8px;">
+                            ${{ number_format((int) $product->final_price, 0, ',', '.') }}
+                        </span>
+                        <span class="badge badge-warning" style="margin-left: 8px;">Oferta</span>
+                    </div>
+                @else
+                    <h4 class="text-success mt-3">
+                        ${{ number_format((int) $product->final_price, 0, ',', '.') }}
+                    </h4>
+                @endif
 
                 <p class="mt-2">
-                    <strong>Stock:</strong> {{ $product->product_quantity }}
+                    <strong>Stock:</strong>
+                    @if(is_null($product->product_quantity))
+                        Disponible
+                    @else
+                        {{ $product->product_quantity }}
+                    @endif
                 </p>
 
-                @if($product->product_quantity > 0)
+                @if(is_null($product->product_quantity) || (int) $product->product_quantity > 0)
                     <form action="{{ route('add_to_cart', $product->id) }}" method="POST" class="mt-4">
                         @csrf
                         <div class="form-group" style="max-width: 120px;">
@@ -49,7 +66,7 @@
                                    name="quantity" 
                                    value="1" 
                                    min="1" 
-                                   max="{{ $product->product_quantity }}" 
+                                   @if(!is_null($product->product_quantity)) max="{{ $product->product_quantity }}" @endif
                                    class="form-control">
                         </div>
                         <button type="submit" class="btn btn-primary mt-2">

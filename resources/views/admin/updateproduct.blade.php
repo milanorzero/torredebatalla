@@ -12,7 +12,7 @@
 
 <div class="container-fluid">
 
-    <div class="card">
+    <div class="card w-100">
         <div class="card-header">
             <strong>Actualizar producto</strong>
         </div>
@@ -85,6 +85,20 @@
                             Solo tienda física
                         </option>
                     </select>
+                </div>
+
+                <div class="form-group mb-3">
+                    <div class="form-check">
+                        <input class="form-check-input"
+                               type="checkbox"
+                               name="is_tournament"
+                               value="1"
+                               id="is_tournament"
+                               {{ $product->is_tournament ? 'checked' : '' }}>
+                        <label class="form-check-label" for="is_tournament">
+                            Es torneo (cupo)
+                        </label>
+                    </div>
                 </div>
 
                 {{-- IMAGEN --}}

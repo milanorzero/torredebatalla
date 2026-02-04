@@ -54,7 +54,7 @@ class CheckoutController extends Controller
             'extra'          => ['nullable', 'string', 'max:255'],
             'postal_code'    => ['nullable', 'string', 'max:50'],
             'pickup_location'=> ['required_if:delivery_type,pickup', 'nullable', 'string', 'max:255'],
-            'payment_method' => ['required', 'in:transfer,webpay,mercadopago'],
+            'payment_method' => ['required', 'in:transfer,mercadopago'],
             'points_used'    => ['nullable', 'integer', 'min:0'],
         ]);
 
@@ -99,16 +99,15 @@ class CheckoutController extends Controller
         $requestedPayment = (string) $request->payment_method;
 
         if ($requestedPayment === 'mercadopago' && blank(config('mercadopago.access_token'))) {
-            $requestedPayment = 'webpay';
+            $requestedPayment = 'transfer';
         }
 
         $paymentMethod = match ($requestedPayment) {
             'transfer' => 'transferencia',
-            'webpay' => 'webpay',
             default => 'mercadopago',
         };
 
-        $buyOrder = 'TB-' . now()->timestamp . '-' . Str::upper(Str::random(6));
+        $orderNumber = 'ORD-' . now()->timestamp . '-' . Str::upper(Str::random(6));
 
         try {
             $order = DB::transaction(function () use (
@@ -120,12 +119,12 @@ class CheckoutController extends Controller
                 $isShipping,
                 $document,
                 $paymentMethod,
-                $buyOrder
+                $orderNumber
             ) {
                 $order = Order::create([
                     'user_id'     => $user?->id,
                     'is_guest'    => !$user,
-                    'buy_order'   => $buyOrder,
+                    'order_number' => $orderNumber,
                     'email'       => $request->email,
                     'nombres'     => $request->first_name,
                     'apellidos'   => $request->last_name,
@@ -146,12 +145,31 @@ class CheckoutController extends Controller
                 ]);
 
                 foreach ($cartItems as $item) {
+                    $product = Product::whereKey($item->product->id)
+                        ->lockForUpdate()
+                        ->first();
+
+                    if (!$product) {
+                        throw new \Exception('Producto no encontrado');
+                    }
+
+                    if (!is_null($product->product_quantity)) {
+                        $available = (int) $product->product_quantity;
+                        $requested = (int) $item->quantity;
+
+                        if ($requested > $available) {
+                            throw new \Exception('Stock insuficiente para: ' . $product->product_title);
+                        }
+
+                        $product->decrement('product_quantity', $requested);
+                    }
+
                     OrderItem::create([
                         'order_id'   => $order->id,
-                        'product_id' => $item->product->id,
+                        'product_id' => $product->id,
                         'quantity'   => $item->quantity,
-                        'price'      => $item->product->final_price,
-                        'subtotal'   => $item->quantity * $item->product->final_price,
+                        'price'      => $product->final_price,
+                        'subtotal'   => $item->quantity * $product->final_price,
                     ]);
                 }
 
@@ -180,10 +198,6 @@ class CheckoutController extends Controller
 
         if ($requestedPayment === 'transfer') {
             return redirect()->route('payment.transfer', $order);
-        }
-
-        if ($requestedPayment === 'webpay') {
-            return redirect()->route('webpay.start', $order);
         }
 
         return redirect()->route('mercadopago.init');

@@ -5,6 +5,17 @@
 
     RewriteEngine On
 
+    # If the static admin template folder exists under /admin, visiting /admin will bypass
+    # Laravel's front controller (because it's a real directory). Redirect only the root.
+    RewriteRule ^admin/?$ /admin/dashboard [R=302,L]
+    RewriteRule ^admin/index\.html$ /admin/dashboard [R=302,L]
+
+    # Route Laravel admin URLs through the front controller even if /admin exists as a directory
+    # for static assets (CSS/JS). Only rewrite when the requested path is not a real file.
+    RewriteCond %{REQUEST_URI} ^/admin [NC]
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^ index.php [L]
+
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]

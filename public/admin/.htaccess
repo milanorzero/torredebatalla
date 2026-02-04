@@ -1,0 +1,19 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    RewriteBase /admin/
+
+    # If someone visits /admin (directory), send them to the Laravel admin dashboard.
+    # Keeps static assets under /admin/* working normally.
+    RewriteRule ^$ /admin/dashboard [R=302,L]
+
+    # Avoid serving the bundled static template landing.
+    RewriteRule ^index\.html$ /admin/dashboard [R=302,L]
+
+    # For any /admin/* URL that is NOT a real file/dir, route back to Laravel's front controller.
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+
+    RewriteRule ^(.*)$ ../index.php [L,QSA]
+</IfModule>

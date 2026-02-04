@@ -17,30 +17,32 @@
 
 {{-- ENVÍO --}}
 <div class="card mb-4">
-    <div class="card-header"><strong>Envío</strong></div>
-    <div class="card-body">
-        @if($order->tipo_envio === 'retiro')
-            <p><strong>Retiro en local</strong></p>
-            <p>{{ $order->local_retiro }}</p>
-        @else
-            <p>
-                {{ $order->calle }} {{ $order->numero }},
-                {{ $order->comuna }}
-            </p>
-        @endif
-    </div>
-</div>
-
-{{-- PRODUCTOS --}}
-<div class="card mb-4">
     <div class="card-header"><strong>Productos</strong></div>
     <div class="card-body">
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Producto</th>
-                    <th>Cantidad</th>
-                    <th>Precio</th>
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th>Cantidad</th>
+                        <th>Precio unitario</th>
+                        <th>Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($order->items as $item)
+                        <tr>
+                            <td>{{ $item->product_title }}</td>
+                            <td>{{ $item->quantity }}</td>
+                            <td>${{ number_format($item->price) }}</td>
+                            <td>${{ number_format($item->price * $item->quantity) }}</td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
                     <th>Subtotal</th>
                 </tr>
             </thead>

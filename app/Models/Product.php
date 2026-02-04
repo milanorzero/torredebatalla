@@ -16,8 +16,14 @@ class Product extends Model
         'product_image',
         'product_category',
 
+        'is_tournament',
+
         
         'sale_channel', // web | store | both
+    ];
+
+    protected $casts = [
+        'is_tournament' => 'boolean',
     ];
 
     protected $appends = ['final_price'];

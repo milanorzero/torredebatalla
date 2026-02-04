@@ -15,14 +15,14 @@ class AdminMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if(Auth::check() && Auth::user()->user_type=="admin"){
+        if (!Auth::check()) {
+            return redirect('/login');
+        }
+
+        if (Auth::user()->user_type !== 'admin') {
+            abort(403, 'No autorizado');
+        }
+
         return $next($request);
-        {
-            if(Auth::check() && Auth::user()->user_type=="user"){
-                abort(401,'No autorizado');
-            }
-        }
-        }
-        abort(401,'No autorizado');
     }
 }

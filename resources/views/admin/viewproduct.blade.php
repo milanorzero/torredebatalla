@@ -18,13 +18,27 @@
         </div>
 
         <div class="card-body">
-            <table class="table table-bordered table-striped align-middle">
-                <thead>
-                    <tr>
-                        <th>Producto</th>
-                        <th>Descripción</th>
-                        <th>Cantidad</th>
-                        <th>Precio</th>
+            <div class="mb-3 d-flex flex-wrap gap-2">
+                <a class="btn btn-sm btn-secondary" href="{{ route('admin.viewproduct') }}">
+                    Todos
+                </a>
+                <a class="btn btn-sm btn-outline-primary" href="{{ route('admin.viewproduct', ['type' => 'products']) }}">
+                    Solo productos
+                </a>
+                <a class="btn btn-sm btn-outline-success" href="{{ route('admin.viewproduct', ['type' => 'tournaments']) }}">
+                    Solo torneos (cupos)
+                </a>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped align-middle">
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Tipo</th>
+                            <th>Descripción</th>
+                            <th>Cantidad</th>
+                            <th>Precio</th>
                         <th>Canal</th>
                         <th>Imagen</th>
                         <th>Categoría</th>
@@ -38,11 +52,23 @@
                             <td>{{ $product->product_title }}</td>
 
                             <td>
+                                @if($product->is_tournament)
+                                    <span class="badge badge-success">Torneo</span>
+                                @else
+                                    <span class="badge badge-secondary">Producto</span>
+                                @endif
+                            </td>
+
+                            <td>
                                 {{ \Illuminate\Support\Str::limit($product->product_description, 120) }}
                             </td>
 
                             <td>
-                                {{ $product->product_quantity }}
+                                @if($product->is_tournament)
+                                    {{ $product->product_quantity }} cupos
+                                @else
+                                    {{ $product->product_quantity }}
+                                @endif
                             </td>
 
                             <td>

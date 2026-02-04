@@ -10,9 +10,44 @@ html, body {
 }
 
 /* Sidebar fijo */
+
 .side-navbar {
     width: 250px;
     min-width: 250px;
+}
+
+/* Sidebar móvil: oculto por defecto, visible con .active-mobile */
+@media (max-width: 991.98px) {
+    #sidebar {
+        position: fixed;
+        top: 0;
+        left: -250px;
+        width: 250px;
+        height: 100vh;
+        z-index: 1050;
+        background: #2d3035;
+        transition: left 0.3s;
+        box-shadow: 2px 0 10px rgba(0,0,0,0.2);
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding-bottom: 40px;
+    }
+    #sidebar.active-mobile {
+        left: 0;
+    }
+    #sidebarOverlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0,0,0,0.4);
+        z-index: 1049;
+    }
+    .page-content {
+        position: relative;
+        z-index: 1;
+    }
 }
 
 /* Layout flex correcto */

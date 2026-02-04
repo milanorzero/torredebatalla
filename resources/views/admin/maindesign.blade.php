@@ -26,18 +26,21 @@
 <header class="header">
     <nav class="navbar navbar-expand-lg">
         <div class="container-fluid d-flex align-items-center justify-content-between">
-
-            <div class="navbar-header">
-                <strong class="text-white">
-                    Panel Administrador
-                </strong>
+            <div class="d-flex align-items-center">
+                <!-- Botón hamburguesa solo visible en móvil -->
+                <button class="btn btn-outline-light d-lg-none mr-3" id="sidebarToggleMobile" type="button" aria-label="Abrir menú">
+                    <i class="fa fa-bars"></i>
+                </button>
+                <div class="navbar-header">
+                    <strong class="text-white">
+                        Panel Administrador
+                    </strong>
+                </div>
             </div>
-
             <div class="list-inline-item logout">
                 <span class="text-white mr-3">
                     {{ auth()->user()->name }}
                 </span>
-
                 <form method="POST" action="{{ route('logout') }}" class="d-inline">
                     @csrf
                     <button class="btn btn-danger btn-sm">
@@ -45,7 +48,6 @@
                     </button>
                 </form>
             </div>
-
         </div>
     </nav>
 </header>
@@ -74,35 +76,53 @@
             <!-- DASHBOARD -->
             <li>
                 <a href="{{ route('admin.dashboard') }}">
-                    <i class="icon-home"></i> Dashboard
+                    <i class="fa fa-home"></i> Dashboard
                 </a>
             </li>
 
             <!-- POS / VENTA EN TIENDA -->
             <li>
                 <a href="{{ route('admin.pos.create') }}">
-                    <i class="icon-bill"></i> Venta en tienda
+                    <i class="fa fa-credit-card"></i> Venta en tienda
                 </a>
             </li>
 
             <!-- PUNTOS -->
             <li>
                 <a href="{{ route('admin.points.create') }}">
-                    <i class="icon-star"></i> Asignar puntos
+                    <i class="fa fa-star"></i> Asignar puntos
                 </a>
+            </li>
+
+            <!-- EVENTOS -->
+            <li>
+                <a href="#eventsMenu" data-toggle="collapse">
+                    <i class="fa fa-calendar"></i> Eventos
+                </a>
+                <ul id="eventsMenu" class="collapse list-unstyled">
+                    <li>
+                        <a href="{{ route('admin.events.calendar.edit') }}"><i class="fa fa-calendar-o"></i> Calendario semanal</a>
+                    </li>
+                    <li>
+                        <a href="{{ route('admin.events.tournaments.create') }}"><i class="fa fa-trophy"></i> Publicar torneo</a>
+                    </li>
+                    <li>
+                        <a href="{{ route('admin.events.tournaments.index') }}"><i class="fa fa-list"></i> Ver torneos</a>
+                    </li>
+                </ul>
             </li>
 
             <!-- CATEGORÍAS -->
             <li>
                 <a href="#categoriesMenu" data-toggle="collapse">
-                    <i class="icon-windows"></i> Categorías
+                    <i class="fa fa-tags"></i> Categorías
                 </a>
                 <ul id="categoriesMenu" class="collapse list-unstyled">
                     <li>
-                        <a href="{{ route('admin.addcategory') }}">Agregar categoría</a>
+                        <a href="{{ route('admin.addcategory') }}"><i class="fa fa-plus"></i> Agregar categoría</a>
                     </li>
                     <li>
-                        <a href="{{ route('admin.viewcategory') }}">Ver categorías</a>
+                        <a href="{{ route('admin.viewcategory') }}"><i class="fa fa-list"></i> Ver categorías</a>
                     </li>
                 </ul>
             </li>
@@ -110,14 +130,14 @@
             <!-- PRODUCTOS -->
             <li>
                 <a href="#productsMenu" data-toggle="collapse">
-                    <i class="icon-windows"></i> Productos
+                    <i class="fa fa-cubes"></i> Productos
                 </a>
                 <ul id="productsMenu" class="collapse list-unstyled">
                     <li>
-                        <a href="{{ route('admin.addproduct') }}">Agregar producto</a>
+                        <a href="{{ route('admin.addproduct') }}"><i class="fa fa-plus"></i> Agregar producto</a>
                     </li>
                     <li>
-                        <a href="{{ route('admin.viewproduct') }}">Ver productos</a>
+                        <a href="{{ route('admin.viewproduct') }}"><i class="fa fa-list"></i> Ver productos</a>
                     </li>
                 </ul>
             </li>
@@ -125,7 +145,21 @@
             <!-- ÓRDENES -->
             <li>
                 <a href="{{ route('admin.orders.index') }}">
-                    <i class="icon-bill"></i> Órdenes
+                    <i class="fa fa-file-text-o"></i> Órdenes
+                </a>
+            </li>
+
+            <!-- BLOG -->
+            <li>
+                <a href="{{ route('admin.blog.index') }}">
+                    <i class="fa fa-newspaper-o"></i> Blog
+                </a>
+            </li>
+
+            <!-- DISEÑO -->
+            <li>
+                <a href="{{ route('admin.slider.index') }}">
+                    <i class="fa fa-picture-o"></i> Slider
                 </a>
             </li>
 

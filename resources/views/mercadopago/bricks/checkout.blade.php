@@ -6,7 +6,7 @@
 <div class="container">
     <h2 class="mb-4">Pago con Mercado Pago</h2>
 
-    <div class="card mb-4">
+    <div class="card mb-4 w-100">
         <div class="card-header"><strong>Resumen</strong></div>
         <div class="card-body">
             <p class="mb-1"><strong>Orden:</strong> #{{ $order->id }}</p>
@@ -14,7 +14,7 @@
         </div>
     </div>
 
-    <div class="card">
+    <div class="card w-100">
         <div class="card-header"><strong>Completa tu pago</strong></div>
         <div class="card-body">
             <div id="paymentBrick_container"></div>

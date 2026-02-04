@@ -118,6 +118,25 @@ $(function () {
         }
     });
 
+    // =========================
+    // Sidebar toggle para móvil
+    // =========================
+    $('#sidebarToggleMobile').on('click', function () {
+        var sidebar = $('#sidebar');
+        sidebar.toggleClass('active-mobile');
+        if (sidebar.hasClass('active-mobile')) {
+            if ($('#sidebarOverlay').length === 0) {
+                $('body').append('<div id="sidebarOverlay"></div>');
+                $('#sidebarOverlay').on('click', function() {
+                    sidebar.removeClass('active-mobile');
+                    $(this).remove();
+                });
+            }
+        } else {
+            $('#sidebarOverlay').remove();
+        }
+    });
+
 
     // ------------------------------------------------------ //
     // For demo purposes, can be deleted

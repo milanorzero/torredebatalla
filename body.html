@@ -1,0 +1,239 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="csrf-token" content="OJ2JgWTK2LUJxvFualmbxhUj9w7iDlbmnlQZzpM5">
+
+    <link rel="shortcut icon" href="http://localhost/front_end/images/favicon.png" type="image/x-icon">
+
+    <title>Iniciar sesión</title>
+
+    <!-- OwlCarousel -->
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.carousel.min.css" />
+
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="http://localhost/front_end/css/bootstrap.css" />
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="http://localhost/front_end/css/font-awesome.min.css" />
+
+    <!-- Custom styles -->
+    <link href="http://localhost/front_end/css/style.css" rel="stylesheet" />
+    <link href="http://localhost/front_end/css/responsive.css" rel="stylesheet" />
+</head>
+
+<body>
+
+<div class="hero_area">
+
+    <!-- HEADER -->
+    <header class="header_section">
+
+        <nav class="navbar navbar-expand-lg custom_nav-container">
+
+            <button class="navbar-toggler" type="button" data-toggle="collapse"
+                data-target="#navbarSupportedContent">
+                <span></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+
+                <!-- NAV LINKS -->
+                <ul class="navbar-nav">
+                    <img src="http://localhost/front_end/images/logo.png" alt="Logo" style="height: 40px; width: auto; display: block;">
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="/allproducts">Tienda</a>
+                    </li>
+
+                                            <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navCategories" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Categorías
+                            </a>
+                            <div class="dropdown-menu" aria-labelledby="navCategories">
+                                <a class="dropdown-item" href="/allproducts">Ver todo</a>
+                                <div class="dropdown-divider"></div>
+                                                                    <a class="dropdown-item" href="/allproducts?category=Accesorios">Accesorios</a>
+                                                                    <a class="dropdown-item" href="/allproducts?category=Peluches">Peluches</a>
+                                                                    <a class="dropdown-item" href="/allproducts?category=Pokemon%20TCG">Pokemon TCG</a>
+                                                            </div>
+                        </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/events">Eventos</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="/blog">Blog</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="/contacto">Contacto</a>
+                    </li>
+
+                    
+                    
+                </ul>
+
+                <!-- USER / CART -->
+                <div class="user_option">
+
+                    <!-- SEARCH ICON (DROPDOWN) -->
+                    <div class="dropdown d-inline-block" style="margin-right: 18px;">
+                        <a href="#" class="dropdown-toggle" id="navbarSearchDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="color: inherit;">
+                            <i class="fa fa-search" aria-hidden="true"></i>
+                            <span class="sr-only">Buscar</span>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-right p-2" aria-labelledby="navbarSearchDropdown" style="min-width: 280px;">
+                            <form action="/search" method="GET" class="m-0">
+                                <div class="input-group">
+                                    <input type="text" name="query" class="form-control" placeholder="Buscar productos..." value="" aria-label="Buscar">
+                                    <div class="input-group-append">
+                                        <button class="btn btn-primary" type="submit">
+                                            <i class="fa fa-search" aria-hidden="true"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    
+                    
+                    
+                                            <a href="/login">
+                            <i class="fa fa-user"></i>
+                            <span>Iniciar sesión</span>
+                        </a>
+
+                        <a href="/register">
+                            <i class="fa fa-user-plus"></i>
+                            <span>Registrarse</span>
+                        </a>
+                    
+                    
+                    <a href="/cartproducts">
+                        <i class="fa fa-shopping-bag"></i>
+                        <span>0</span>
+                    </a>
+
+                </div>
+            </div>
+        </nav>
+    </header>
+    <!-- END HEADER -->
+
+    
+    
+</div>
+
+<!-- MAIN CONTENT -->
+<section class="shop_section layout_padding">
+    <div class="container">
+                    </div>
+    <div class="container" style="max-width: 520px;">
+    <div class="card shadow-sm w-100">
+        <div class="card-body p-4">
+
+            <h2 class="text-center mb-3">
+                Iniciar sesión
+            </h2>
+
+            
+            
+            <form method="POST" action="/login">
+                <input type="hidden" name="_token" value="OJ2JgWTK2LUJxvFualmbxhUj9w7iDlbmnlQZzpM5" autocomplete="off">
+                
+                <div class="form-group mb-3">
+                    <label>Correo electrónico</label>
+                    <input
+                        type="email"
+                        name="email"
+                        value=""
+                        class="form-control"
+                        placeholder="correo@ejemplo.com"
+                        required
+                        autofocus
+                    >
+                                    </div>
+
+                
+                <div class="form-group mb-3">
+                    <label>Contraseña</label>
+                    <input
+                        type="password"
+                        name="password"
+                        class="form-control"
+                        required
+                    >
+                                    </div>
+
+                
+                <div class="form-check mb-3">
+                    <input
+                        type="checkbox"
+                        name="remember"
+                        class="form-check-input"
+                        id="remember"
+                    >
+                    <label class="form-check-label" for="remember">
+                        Recordarme
+                    </label>
+                </div>
+
+                
+                <button class="btn btn-primary w-100">
+                    Iniciar sesión
+                </button>
+
+                
+                <div class="text-center mt-3">
+                                            <a href="http://localhost/forgot-password">
+                            ¿Olvidaste tu contraseña?
+                        </a>
+                                    </div>
+
+                <div class="text-center mt-2">
+                    <a href="http://localhost/register">
+                        Crear cuenta
+                    </a>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer_section">
+    <div class="container">
+        <div class="d-flex justify-content-center">
+            <a class="mx-2" href="https://www.instagram.com/torredebatalla/" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+                <i class="fa fa-instagram fa-2x"></i>
+            </a>
+            <a class="mx-2" href="https://www.youtube.com/@TorredeBatalla" target="_blank" rel="noopener noreferrer" aria-label="YouTube">
+                <i class="fa fa-youtube-play fa-2x"></i>
+            </a>
+        </div>
+        <p>&copy; 2026 Torre de Batalla</p>
+    </div>
+</footer>
+
+<!-- JS -->
+<script src="http://localhost/front_end/js/jquery-3.4.1.min.js"></script>
+<script src="http://localhost/front_end/js/bootstrap.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js"></script>
+<script src="http://localhost/front_end/js/custom.js"></script>
+
+</body>
+</html>

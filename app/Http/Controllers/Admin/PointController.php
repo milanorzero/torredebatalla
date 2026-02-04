@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use App\Models\PointTransaction;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class PointController extends Controller
 {
@@ -26,23 +26,21 @@ class PointController extends Controller
 
         $user = User::findOrFail($request->user_id);
 
-        // Evitar saldo negativo
-        if ($request->points < 0 && abs($request->points) > $user->points_balance) {
-            return back()->withErrors('El usuario no tiene suficientes puntos.');
+        $points = (int) $request->points;
+        $reason = (string) $request->description;
+
+        try {
+            DB::transaction(function () use ($user, $points, $reason): void {
+                if ($points > 0) {
+                    $user->addPoints($points, $reason, 'admin');
+                    return;
+                }
+
+                $user->spendPoints(abs($points), $reason, 'admin');
+            });
+        } catch (\Throwable $e) {
+            return back()->withErrors($e->getMessage());
         }
-
-        // Actualizar saldo
-        $user->points_balance += $request->points;
-        $user->save();
-
-        // Registrar transacción
-        PointTransaction::create([
-            'user_id'     => $user->id,
-            'amount'      => $request->points,
-            'type'        => $request->points > 0 ? 'earn' : 'spend',
-            'channel'     => 'admin',
-            'description' => $request->description,
-        ]);
 
         return redirect()
             ->back()

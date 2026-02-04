@@ -18,26 +18,27 @@
         </div>
 
         <div class="card-body">
-            <table class="table table-bordered table-striped">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Nombre categoría</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($categories as $category)
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped">
+                    <thead>
                         <tr>
-                            <td>{{ $category->id }}</td>
-                            <td>{{ $category->category }}</td>
-                            <td>
-                                <a href="{{ route('admin.categoryupdate', $category->id) }}"
-                                   class="btn btn-sm btn-warning">
-                                    Editar
-                                </a>
+                            <th>ID</th>
+                            <th>Nombre categoría</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($categories as $category)
+                            <tr>
+                                <td>{{ $category->id }}</td>
+                                <td>{{ $category->category }}</td>
+                                <td>
+                                    <a href="{{ route('admin.categoryupdate', $category->id) }}"
+                                       class="btn btn-sm btn-warning">
+                                        Editar
+                                    </a>
 
-                                <a href="{{ route('admin.categorydelete', $category->id) }}"
+                                    <a href="{{ route('admin.categorydelete', $category->id) }}"
                                    class="btn btn-sm btn-danger"
                                    onclick="return confirm('¿Confirma borrar categoría?')">
                                     Eliminar

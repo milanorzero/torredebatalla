@@ -9,7 +9,7 @@
     <p>Escríbenos y con gusto te ayudamos.</p>
 
     <div class="row">
-        <div class="col-md-7">
+        <div class="col-12 col-md-7 mb-4 mb-md-0">
             <form method="POST" action="{{ route('contacto.send', [], false) }}">
                 @csrf
 

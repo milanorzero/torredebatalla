@@ -10,11 +10,9 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
-        "laragear/transbank": "^3.2",
         "laravel/framework": "^12.0",
         "laravel/tinker": "^2.10.1",
-        "mercadopago/dx-php": "^3.0",
-        "transbank/transbank-sdk": "^5.1"
+        "mercadopago/dx-php": "^3.0"
     },
     "require-dev": {
         "barryvdh/laravel-ide-helper": "^3.6",

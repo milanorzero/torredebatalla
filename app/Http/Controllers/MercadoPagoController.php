@@ -8,11 +8,14 @@ use App\Models\PointTransaction;
 use App\Models\ProductCart;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use MercadoPago\Client\Payment\PaymentClient;
 use MercadoPago\Client\Preference\PreferenceClient;
 use MercadoPago\Client\Common\RequestOptions;
+use MercadoPago\Exceptions\MPApiException;
 use MercadoPago\MercadoPagoConfig;
 
 class MercadoPagoController extends Controller
@@ -28,6 +31,12 @@ class MercadoPagoController extends Controller
         $order = Order::where('id', $orderId)
             ->where('estado_pago', 'pendiente')
             ->firstOrFail();
+
+        // Si el total es 0 (puntos cubren todo), no se necesita pasar por Mercado Pago.
+        if ((float) $order->total <= 0) {
+            $this->markOrderAsPaid($order);
+            return redirect()->route('checkout.success', $order);
+        }
 
         $accessToken = config('mercadopago.access_token');
 
@@ -53,9 +62,9 @@ class MercadoPagoController extends Controller
                 ],
             ],
             'back_urls' => [
-                'success' => route('mercadopago.return', ['result' => 'success']),
-                'failure' => route('mercadopago.return', ['result' => 'failure']),
-                'pending' => route('mercadopago.return', ['result' => 'pending']),
+                'success' => route('mercadopago.return.success'),
+                'failure' => route('mercadopago.return.failure'),
+                'pending' => route('mercadopago.return.pending'),
             ],
             'auto_return' => 'approved',
         ];
@@ -66,7 +75,33 @@ class MercadoPagoController extends Controller
         }
 
         $client = new PreferenceClient();
-        $preference = $client->create($request);
+        try {
+            $preference = $client->create($request);
+        } catch (MPApiException $e) {
+            $apiResponse = $e->getApiResponse();
+            $statusCode = $apiResponse->getStatusCode();
+            $content = $apiResponse->getContent();
+
+            Log::error('Mercado Pago preference create failed', [
+                'order_id' => (int) $order->id,
+                'status' => (int) $statusCode,
+                'response' => $content,
+            ]);
+
+            $details = '';
+            if (is_array($content)) {
+                $message = $content['message'] ?? null;
+                $error = $content['error'] ?? null;
+                $cause = $content['cause'] ?? null;
+                $details = trim(implode(' | ', array_filter([
+                    is_string($error) ? $error : null,
+                    is_string($message) ? $message : null,
+                    is_array($cause) ? json_encode($cause) : null,
+                ])));
+            }
+
+            abort(500, 'Mercado Pago rechazó la preferencia' . ($details ? (': ' . $details) : ''));
+        }
 
         $initPoint = config('mercadopago.sandbox')
             ? $preference->sandbox_init_point
@@ -118,9 +153,9 @@ class MercadoPagoController extends Controller
                 ],
             ],
             'back_urls' => [
-                'success' => route('mercadopago.return', ['result' => 'success']),
-                'failure' => route('mercadopago.return', ['result' => 'failure']),
-                'pending' => route('mercadopago.return', ['result' => 'pending']),
+                'success' => route('mercadopago.return.success'),
+                'failure' => route('mercadopago.return.failure'),
+                'pending' => route('mercadopago.return.pending'),
             ],
             'auto_return' => 'approved',
         ];
@@ -219,7 +254,7 @@ class MercadoPagoController extends Controller
         if ((string) $payment->status === 'approved') {
             $this->markOrderAsPaid($order);
         } elseif (in_array((string) $payment->status, ['rejected', 'cancelled'], true)) {
-            $order->update(['estado_pago' => 'rechazado']);
+            $this->rejectOrder($order);
         }
 
         return response()->json([
@@ -260,7 +295,7 @@ class MercadoPagoController extends Controller
                     if ((string) $payment->status === 'approved') {
                         $this->markOrderAsPaid($order);
                     } elseif (in_array((string) $payment->status, ['rejected', 'cancelled'], true)) {
-                        $order->update(['estado_pago' => 'rechazado']);
+                        $this->rejectOrder($order);
                     }
                 }
             } catch (\Throwable $e) {
@@ -277,7 +312,48 @@ class MercadoPagoController extends Controller
 
     public function return(Request $request)
     {
-        $result = (string) $request->query('result', 'pending');
+        return $this->handleReturn($request);
+    }
+
+    public function returnSuccess(Request $request)
+    {
+        return $this->handleReturn($request, 'success');
+    }
+
+    public function returnFailure(Request $request)
+    {
+        return $this->handleReturn($request, 'failure');
+    }
+
+    public function returnPending(Request $request)
+    {
+        return $this->handleReturn($request, 'pending');
+    }
+
+    private function handleReturn(Request $request, ?string $forcedResult = null)
+    {
+        // Mercado Pago suele volver con parámetros como: status/collection_status/payment_id/external_reference.
+        // Si back_urls apunta a una URL específica, forzamos el resultado correspondiente.
+        $result = $forcedResult ?: (string) $request->query('result', '');
+
+        $status = (string) ($request->query('status')
+            ?: $request->query('collection_status')
+            ?: $request->query('payment_status')
+            ?: '');
+
+        if ($status !== '') {
+            if ($status === 'approved') {
+                $result = 'success';
+            } elseif (in_array($status, ['rejected', 'cancelled'], true)) {
+                $result = 'failure';
+            } else {
+                $result = 'pending';
+            }
+        }
+
+        if ($result === '') {
+            $result = 'pending';
+        }
 
         $externalReference = $request->query('external_reference');
         $orderId = $externalReference ?: session('order_id');
@@ -293,11 +369,13 @@ class MercadoPagoController extends Controller
         }
 
         if ($result === 'failure') {
-            $order->update(['estado_pago' => 'rechazado']);
+            $this->rejectOrder($order);
             return view('mercadopago.failed', compact('order'));
         }
 
-        $paymentId = $request->query('payment_id');
+        $paymentId = $request->query('payment_id')
+            ?: $request->query('collection_id')
+            ?: $request->query('data.id');
 
         if (!$paymentId) {
             // For pending/unknown responses without payment id.
@@ -328,7 +406,7 @@ class MercadoPagoController extends Controller
         }
 
         if (in_array((string) $payment->status, ['rejected', 'cancelled'], true)) {
-            $order->update(['estado_pago' => 'rechazado']);
+            $this->rejectOrder($order);
             return view('mercadopago.failed', compact('order'));
         }
 
@@ -337,6 +415,10 @@ class MercadoPagoController extends Controller
 
     public function webhook(Request $request)
     {
+        if (!$this->verifyWebhookSignature($request)) {
+            return response()->json(['ok' => false], 401);
+        }
+
         $paymentId = $request->input('data.id')
             ?: $request->input('id')
             ?: $request->query('data.id')
@@ -376,10 +458,113 @@ class MercadoPagoController extends Controller
         if ((string) $payment->status === 'approved') {
             $this->markOrderAsPaid($order);
         } elseif (in_array((string) $payment->status, ['rejected', 'cancelled'], true)) {
-            $order->update(['estado_pago' => 'rechazado']);
+            $this->rejectOrder($order);
         }
 
         return response()->json(['ok' => true]);
+    }
+
+    private function rejectOrder(Order $order): void
+    {
+        if ($order->estado_pago !== 'pendiente') {
+            return;
+        }
+
+        DB::transaction(function () use ($order): void {
+            $order->refresh();
+            if ($order->estado_pago !== 'pendiente') {
+                return;
+            }
+
+            $order->restockProducts();
+            $order->update(['estado_pago' => 'rechazado']);
+        });
+    }
+
+    private function verifyWebhookSignature(Request $request): bool
+    {
+        $secret = (string) config('mercadopago.webhook_secret');
+        if ($secret === '') {
+            // No secret configured: accept request (cannot validate origin).
+            return true;
+        }
+
+        $xSignature = (string) $request->header('x-signature', '');
+        $xRequestId = (string) $request->header('x-request-id', '');
+
+        if ($xSignature === '' || $xRequestId === '') {
+            Log::warning('Mercado Pago webhook missing signature headers', [
+                'has_x_signature' => $xSignature !== '',
+                'has_x_request_id' => $xRequestId !== '',
+            ]);
+            return false;
+        }
+
+        [$ts, $hash] = $this->parseWebhookSignature($xSignature);
+        if ($ts === '' || $hash === '') {
+            Log::warning('Mercado Pago webhook signature could not be parsed');
+            return false;
+        }
+
+        // Prefer query param `data.id` as per Mercado Pago docs; fallback to body.
+        $dataId = (string) ($request->query('data.id') ?: $request->input('data.id') ?: '');
+
+        $manifest = $this->buildWebhookManifest($dataId, $xRequestId, $ts);
+        $computed = hash_hmac('sha256', $manifest, $secret);
+
+        $ok = hash_equals($computed, $hash);
+        if (!$ok) {
+            Log::warning('Mercado Pago webhook signature mismatch', [
+                'manifest' => $manifest,
+            ]);
+        }
+
+        return $ok;
+    }
+
+    /** @return array{0:string,1:string} [ts, v1] */
+    private function parseWebhookSignature(string $xSignature): array
+    {
+        $ts = '';
+        $hash = '';
+
+        foreach (explode(',', $xSignature) as $part) {
+            $keyValue = explode('=', trim($part), 2);
+            if (count($keyValue) !== 2) {
+                continue;
+            }
+
+            [$key, $value] = $keyValue;
+            $key = trim($key);
+            $value = trim($value);
+
+            if ($key === 'ts') {
+                $ts = $value;
+            } elseif ($key === 'v1') {
+                $hash = $value;
+            }
+        }
+
+        return [$ts, $hash];
+    }
+
+    private function buildWebhookManifest(string $dataId, string $xRequestId, string $ts): string
+    {
+        // Template: id:[data.id_url];request-id:[x-request-id_header];ts:[ts_header];
+        // If any value is missing, it must be removed.
+        $parts = [];
+
+        if ($dataId !== '') {
+            $parts[] = 'id:' . $dataId;
+        }
+        if ($xRequestId !== '') {
+            $parts[] = 'request-id:' . $xRequestId;
+        }
+        if ($ts !== '') {
+            $parts[] = 'ts:' . $ts;
+        }
+
+        return implode(';', $parts) . ';';
     }
 
     private function markOrderAsPaid(Order $order): void

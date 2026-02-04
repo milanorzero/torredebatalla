@@ -31,7 +31,7 @@ namespace App\Models{
 namespace App\Models{
 /**
  * @property int $id
- * @property string $buy_order
+ * @property string $order_number
  * @property string|null $webpay_token
  * @property int|null $user_id
  * @property int $is_guest
